@@ -46,11 +46,6 @@ brew untrust --formula lucasfais/aegis-rs/aegis-rs   # or: brew untrust lucasfai
 brew untap lucasfais/aegis-rs
 ```
 
-## Versioning
-
-The formula is pinned to a specific upstream release (currently **v0.5.1**) with
-per-architecture SHA256 checksums.
-
 ## Updating to a new upstream version
 
 ### Automatic (GitHub Actions)
