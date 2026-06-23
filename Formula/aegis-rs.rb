@@ -4,6 +4,11 @@ class AegisRs < Formula
   version "0.5.1"
   license "GPL-3.0-only"
 
+  livecheck do
+    url :stable
+    strategy :github_latest
+  end
+
   on_macos do
     on_arm do
       url "https://github.com/Granddave/aegis-rs/releases/download/v#{version}/aegis-aarch64-apple-darwin-v#{version}.tgz"
@@ -24,11 +29,6 @@ class AegisRs < Formula
       url "https://github.com/Granddave/aegis-rs/releases/download/v#{version}/aegis-x86_64-unknown-linux-gnu-v#{version}.tgz"
       sha256 "d57a1a23c07f28c1dc4d8299d4724ea5a2a45197c4fcfe3152db3b7fd37a5775"
     end
-  end
-
-  livecheck do
-    url :stable
-    strategy :github_latest
   end
 
   def install

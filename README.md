@@ -53,31 +53,34 @@ per-architecture SHA256 checksums.
 
 ## Updating to a new upstream version
 
-When [`aegis-rs`](https://github.com/Granddave/aegis-rs/releases) publishes a new
-release, update the formula by hand:
+### Automatic (GitHub Actions)
 
-1. **Recompute the checksums** for the four supported targets. Set `VERSION` to the
-   new release (without the `v` prefix) and run:
+The [`Update formula`](.github/workflows/update-formula.yml) workflow keeps the tap
+in sync with upstream:
 
-   ```sh
-   VERSION=0.5.2
-   BASE="https://github.com/Granddave/aegis-rs/releases/download/v${VERSION}"
-   for t in aarch64-apple-darwin x86_64-apple-darwin \
-            aarch64-unknown-linux-gnu x86_64-unknown-linux-gnu; do
-     f="aegis-${t}-v${VERSION}.tgz"
-     curl -sL "${BASE}/${f}" -o "/tmp/${f}"
-     echo "${t}: $(shasum -a 256 "/tmp/${f}" | cut -d' ' -f1)"
-   done
-   ```
+- **Daily schedule** — polls [`aegis-rs` releases](https://github.com/Granddave/aegis-rs/releases)
+  and, when a newer version exists, opens a pull request that bumps `version` and
+  recomputes all four `sha256` checksums.
+- **Manual run** — trigger it from the Actions tab ("Run workflow"), optionally
+  passing a specific version; leave blank to use the latest release.
 
-2. **Edit `Formula/aegis-rs.rb`:** bump `version` to the new value and replace each
-   of the four `sha256` lines with the matching checksum printed above. The URLs
-   reference `#{version}` automatically, so they don't need editing.
+Each run downloads the release assets and runs `brew style` / `brew audit` before
+opening the PR. Review the diff and merge to publish the new version.
 
-3. **Verify** the formula still installs and passes its test (see `TESTING.md`),
-   then commit.
+> Requires repo setting **Settings → Actions → General → "Allow GitHub Actions to
+> create and approve pull requests"** to be enabled.
 
-> Automating these bumps with GitHub Actions is a planned future improvement.
+### Manual
+
+Run the helper script with the new version (without the `v` prefix); it downloads
+each asset, computes checksums, and rewrites the formula:
+
+```sh
+bash scripts/update-formula.sh 0.5.2
+```
+
+Then verify (see `TESTING.md`) and commit. The URLs reference `#{version}`
+automatically, so only `version` and the `sha256` lines change.
 
 ## License
 
