@@ -1,0 +1,81 @@
+name: Update formula
+
+on:
+  schedule:
+    # Daily at 06:00 UTC — poll upstream for a new release.
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to bump to (without the 'v' prefix). Leave blank to use the latest upstream release."
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Determine target version
+        id: ver
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          input="${{ github.event.inputs.version }}"
+          if [ -n "$input" ]; then
+            target="${input#v}"
+          else
+            tag="$(gh release view --repo Granddave/aegis-rs --json tagName -q .tagName)"
+            target="${tag#v}"
+          fi
+          current="$(grep -E '^[[:space:]]*version "' Formula/aegis-rs.rb | head -1 | sed -E 's/.*version "([^"]+)".*/\1/')"
+          echo "target=$target"   >> "$GITHUB_OUTPUT"
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          if [ "$target" = "$current" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Already on $current; nothing to do."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Bumping $current -> $target"
+          fi
+
+      # Set up Homebrew BEFORE editing the formula: tapping this repo resets the
+      # working tree, which would otherwise discard the update-formula.sh changes.
+      - name: Set up Homebrew
+        if: steps.ver.outputs.changed == 'true'
+        uses: Homebrew/actions/setup-homebrew@main
+
+      - name: Update formula
+        if: steps.ver.outputs.changed == 'true'
+        run: bash scripts/update-formula.sh "${{ steps.ver.outputs.target }}"
+
+      - name: Lint formula
+        if: steps.ver.outputs.changed == 'true'
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: "1"
+        run: |
+          brew style Formula/aegis-rs.rb
+          # `brew audit` only accepts a name (not a path); don't fail on tap-only warnings.
+          brew audit --formula lucasfais/aegis-rs/aegis-rs || true
+
+      - name: Create pull request
+        if: steps.ver.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: "aegis-rs ${{ steps.ver.outputs.target }}"
+          branch: "update/aegis-rs-${{ steps.ver.outputs.target }}"
+          delete-branch: true
+          title: "aegis-rs ${{ steps.ver.outputs.target }}"
+          body: |
+            Automated bump from `${{ steps.ver.outputs.current }}` to `${{ steps.ver.outputs.target }}`.
+
+            - Updated `version` and recomputed all four `sha256` checksums.
+            - Verified release assets download and ran `brew style` / `brew audit`.
+
+            Review the diff, then merge to publish the new version to the tap.
