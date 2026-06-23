@@ -1,7 +1,7 @@
 class AegisRs < Formula
   desc "Aegis compatible OTP generator for the CLI"
   homepage "https://github.com/Granddave/aegis-rs"
-  version "0.5.1"
+  version "0.5.0"
   license "GPL-3.0-only"
 
   livecheck do
@@ -12,22 +12,22 @@ class AegisRs < Formula
   on_macos do
     on_arm do
       url "https://github.com/Granddave/aegis-rs/releases/download/v#{version}/aegis-aarch64-apple-darwin-v#{version}.tgz"
-      sha256 "1731a08d5bc7c6b3f7228249681bb24d306accb36be4bf062f97273a58b61f99"
+      sha256 "ca236225d6a86706d7c8eadf0f6d3690dabc5a9e6386064afb261f98f9adb135"
     end
     on_intel do
       url "https://github.com/Granddave/aegis-rs/releases/download/v#{version}/aegis-x86_64-apple-darwin-v#{version}.tgz"
-      sha256 "33de78dd798f0abdde5b39a6d507682aca0eb5efbc930b9d3f63a96d7cbda3b6"
+      sha256 "8442cc6a5828b94fea5e94545c503525ad9c1405a2d1dd7c3305392484cf1d66"
     end
   end
 
   on_linux do
     on_arm do
       url "https://github.com/Granddave/aegis-rs/releases/download/v#{version}/aegis-aarch64-unknown-linux-gnu-v#{version}.tgz"
-      sha256 "359dd29a1abcf8d63e7950c761c9b5cd5c8fe6c58b1977e30ed9ddde385e8237"
+      sha256 "9cd5fdaa470ba191f1efbb0692e0b32c3db17fb3e2c7bb6f6e97a6b45f3ff8ab"
     end
     on_intel do
       url "https://github.com/Granddave/aegis-rs/releases/download/v#{version}/aegis-x86_64-unknown-linux-gnu-v#{version}.tgz"
-      sha256 "d57a1a23c07f28c1dc4d8299d4724ea5a2a45197c4fcfe3152db3b7fd37a5775"
+      sha256 "93844980dd7650f45db073d952e59091f7ae8076ba76f4b3c976204ebc9b08d1"
     end
   end
 
